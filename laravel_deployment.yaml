@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-deployment
+  labels:
+    app: laravel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: laravel
+  template:
+    metadata:
+      labels:
+        app: laravel
+    spec:
+      volumes:
+      - name: laravel
+        persistentVolumeClaim:
+          claimName: laravel
+      - name: shared-files              
+        emptyDir: {}
+      - name: config
+        configMap:
+          name: nginx-config
+          items:
+          - key: config
+            path: site.conf
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: shared-files    
+          mountPath: /var/www/html/laravel
+        - name: config
+          mountPath: /etc/nginx/conf.d
+      - name: php
+        image: dangthuydung/laravel-demo123
+        volumeMounts:
+        - name: shared-files    
+          mountPath: /var/www/html/laravel
+        lifecycle:  
+          postStart:  # commands that will be executed after container was created
+            exec:
+              command:  #generate key, 
+                - "sh" 
+                - "-c"
+                - >
+                  mv /laravel/.env.example /laravel/.env;
+                  cp -R /laravel/ /var/www/html/;
+                  chown -R www-data:www-data /var/www/html;
+                  cd /var/www/html/laravel;
+                  php artisan key:generate;
+                                 
