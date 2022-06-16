@@ -10,7 +10,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: my-local-storage
   local:
-    path: /home/ubuntu/
+    path: /home/ubuntu/code_deployment_k8s_laravel
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -18,4 +18,4 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - worker1
+          - node2
